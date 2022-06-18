@@ -9,6 +9,10 @@ suspend inline fun BehaviourContext.handleClientExceptions(message: Message, blo
     try {
         block()
     } catch (e: HoleClientException) {
-        reply(message, e.error?.error ?: e.message ?: "Unknown error")
+        reply(
+            message, e.error?.error ?: (e.message ?: "Unknown error").also {
+                e.printStackTrace()
+            }
+        )
     }
 }
