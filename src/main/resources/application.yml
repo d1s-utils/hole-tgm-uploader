@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: "hole-tgm-uploader"
+
+  main:
+    banner-mode: off
