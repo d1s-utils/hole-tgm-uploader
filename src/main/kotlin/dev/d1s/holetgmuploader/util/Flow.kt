@@ -19,7 +19,7 @@ suspend fun BehaviourContext.waitGroup(filename: String, message: Message, holeC
     val groupReplyMarkup = ReplyKeyboardMarkup(
         matrix {
             val groups = runBlocking {
-                holeClient.getAvailableGroups()
+                holeClient.getAllGroupNames()
             }
 
             groups.chunked(3).forEach {
