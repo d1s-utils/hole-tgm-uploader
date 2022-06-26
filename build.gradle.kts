@@ -22,7 +22,7 @@ val tgbotapiVersion: String by project
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("com.github.hole-project.hole-kt:spring-boot-starter-hole-kt:$holeKtVersion")
+    implementation("com.github.d1s-utils.hole-kt:spring-boot-starter-hole-kt:$holeKtVersion")
     implementation("dev.inmo:tgbotapi-jvm:$tgbotapiVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")

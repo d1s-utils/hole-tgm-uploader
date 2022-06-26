@@ -2,7 +2,9 @@ package dev.d1s.holetgmuploader.util
 
 import dev.d1s.hole.client.core.HoleClient
 import dev.d1s.hole.client.entity.storageObject.StorageObject
+import dev.d1s.holetgmuploader.exception.UploadAbortedException
 import dev.inmo.tgbotapi.extensions.api.send.reply
+import dev.inmo.tgbotapi.extensions.api.send.sendMessage
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.extensions.behaviour_builder.expectations.waitText
 import dev.inmo.tgbotapi.requests.send.SendTextMessage
@@ -14,6 +16,8 @@ import dev.inmo.tgbotapi.types.message.textsources.regular
 import dev.inmo.tgbotapi.utils.matrix
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+
+private const val ABORTION_COMMAND = "abort"
 
 suspend fun BehaviourContext.waitGroup(filename: String, message: Message, holeClient: HoleClient): String {
     val groupReplyMarkup = ReplyKeyboardMarkup(
@@ -29,29 +33,58 @@ suspend fun BehaviourContext.waitGroup(filename: String, message: Message, holeC
                     }
                 )
             }
+
+            add(listOf(SimpleKeyboardButton(ABORTION_COMMAND)))
         },
         resizeKeyboard = true
     )
 
-    return waitText(
+    val text = waitText(
         SendTextMessage(
             message.chat.id,
             listOf(
                 regular("Send me the group to upload to ("),
                 code(filename),
-                regular(")")
+                regular("). Or reply with "),
+                code(ABORTION_COMMAND),
+                regular(" to abort.")
             ),
             replyMarkup = groupReplyMarkup
         )
     ).first().text
+
+    if (text == ABORTION_COMMAND) {
+        abort(message)
+    }
+
+    return text
 }
 
-suspend fun BehaviourContext.waitFilename(message: Message) = waitText(
-    SendTextMessage(
-        message.chat.id,
-        "Send me the filename to use."
-    )
-).first().text
+suspend fun BehaviourContext.waitFilename(message: Message): String {
+    val text = waitText(
+        SendTextMessage(
+            message.chat.id,
+            listOf(
+                regular("Send me the filename to use. Or reply with "),
+                code(ABORTION_COMMAND),
+                regular(" to abort.")
+            ),
+            replyMarkup = ReplyKeyboardMarkup(
+                matrix {
+                    add(listOf(SimpleKeyboardButton(ABORTION_COMMAND)))
+                },
+                resizeKeyboard = true
+            )
+
+        )
+    ).first().text
+
+    if (text == ABORTION_COMMAND) {
+        abort(message)
+    }
+
+    return text
+}
 
 suspend fun BehaviourContext.replyWithObject(message: Message, obj: StorageObject, holeClient: HoleClient) {
     reply(
@@ -65,4 +98,9 @@ suspend fun BehaviourContext.replyWithObject(message: Message, obj: StorageObjec
             code(holeClient.configuration.baseUrl.toString())
         )
     )
+}
+
+private suspend fun BehaviourContext.abort(message: Message) {
+    sendMessage(message.chat, "Aborted.")
+    throw UploadAbortedException()
 }
