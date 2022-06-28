@@ -7,7 +7,6 @@ import dev.inmo.tgbotapi.extensions.api.files.downloadFileStream
 import dev.inmo.tgbotapi.extensions.behaviour_builder.BehaviourContext
 import dev.inmo.tgbotapi.types.message.abstracts.CommonMessage
 import dev.inmo.tgbotapi.types.message.content.MediaContent
-import io.ktor.http.*
 import io.ktor.utils.io.jvm.javaio.*
 
 suspend fun BehaviourContext.handleMediaContent(
@@ -19,26 +18,14 @@ suspend fun BehaviourContext.handleMediaContent(
         try {
             replyWithObject(
                 message,
-                holeClient.postObject {
+                holeClient.postObject(true) {
                     content = bot.downloadFileStream(message.content.media.fileId).toInputStream()
 
                     val objectName = filename ?: waitFilename(message)
 
                     fileName = objectName
 
-                    val objectGroup = waitGroup(objectName, message, holeClient)
-
-                    try {
-                        holeClient.getGroup(objectGroup)
-                    } catch (e: HoleClientException) {
-                        if (e.error?.status == HttpStatusCode.NotFound.value) {
-                            holeClient.postGroup {
-                                name = objectGroup
-                            }
-                        }
-                    }
-
-                    group = objectGroup
+                    group = waitGroup(objectName, message, holeClient)
                 },
                 holeClient
             )
