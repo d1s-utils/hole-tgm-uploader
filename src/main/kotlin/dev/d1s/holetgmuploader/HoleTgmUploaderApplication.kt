@@ -1,5 +1,6 @@
 package dev.d1s.holetgmuploader
 
+import org.springframework.boot.WebApplicationType
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
@@ -7,5 +8,7 @@ import org.springframework.boot.runApplication
 class HoleTgmUploaderApplication
 
 fun main(args: Array<String>) {
-    runApplication<HoleTgmUploaderApplication>(*args)
+    runApplication<HoleTgmUploaderApplication>(*args) {
+        webApplicationType = WebApplicationType.NONE
+    }
 }
